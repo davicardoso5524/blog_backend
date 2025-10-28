@@ -178,9 +178,9 @@ const getPostBySlug = async (req, res) => {
 
     // Verificar permissões
     if (
-      req.user.role !== 'ADMIN' && 
-      post.authorId !== req.user.id && 
-      post.status !== 'PUBLISHED'
+      (!req.user || req.user.role !== 'ADMIN') && // não logado ou não admin
+      post.status !== 'PUBLISHED' &&             // post não publicado
+      (!req.user || post.authorId !== req.user.id) // não é autor logado
     ) {
       return res.status(403).json({ error: 'Sem permissão para visualizar este post' });
     }
