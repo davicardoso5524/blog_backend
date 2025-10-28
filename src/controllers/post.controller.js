@@ -75,12 +75,15 @@ const listPosts = async (req, res) => {
       where.authorId = authorId;
     }
 
-    // Se não for ADMIN, só mostra posts do próprio usuário ou publicados
-    if (req.user.role !== 'ADMIN') {
+    if (!req.user || req.user.role !== 'ADMIN') {
       where.OR = [
-        { authorId: req.user.id },
-        { status: 'PUBLISHED' }
+        { status: 'PUBLISHED' } // garante que usuários não logados só vejam publicados
       ];
+
+      // Se tiver logado mas não for ADMIN, também pode mostrar os próprios posts
+      if (req.user) {
+        where.OR.push({ authorId: req.user.id });
+      }
     }
 
     const [posts, total] = await Promise.all([
