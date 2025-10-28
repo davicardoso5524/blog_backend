@@ -1,0 +1,69 @@
+// Configuração do Prisma ORM
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// MODELO DE USUÁRIOS
+// ============================================
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Hash bcrypt da senha
+  name      String
+  role      Role     @default(PUBLISHER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relações
+  posts     Post[]   @relation("AuthorPosts")    // Posts criados pelo usuário
+  approvals Post[]   @relation("ApprovedPosts")  // Posts aprovados pelo usuário
+}
+
+// ============================================
+// MODELO DE POSTS
+// ============================================
+model Post {
+  id          String      @id @default(uuid())
+  title       String
+  content     String      @db.Text  // Permite textos longos
+  slug        String      @unique   // URL amigável (ex: meu-primeiro-post)
+  status      PostStatus  @default(DRAFT)
+  authorId    String      // ID do autor (FK)
+  approvedBy  String?     // ID de quem aprovou (opcional, FK)
+  publishedAt DateTime?   // Data de publicação (quando aprovado)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relações
+  author      User        @relation("AuthorPosts", fields: [authorId], references: [id], onDelete: Cascade)
+  approver    User?       @relation("ApprovedPosts", fields: [approvedBy], references: [id], onDelete: SetNull)
+  
+  // Índices para otimizar consultas
+  @@index([status])       // Buscar posts por status
+  @@index([publishedAt])  // Ordenar posts publicados
+  @@index([authorId])     // Buscar posts de um autor
+}
+
+// ============================================
+// ENUMS (Tipos Fixos)
+// ============================================
+
+// Tipos de usuários
+enum Role {
+  ADMIN      // Pode aprovar/rejeitar posts
+  PUBLISHER  // Pode criar posts
+}
+
+// Status dos posts
+enum PostStatus {
+  DRAFT      // Rascunho (não enviado para aprovação)
+  PENDING    // Aguardando aprovação do ADMIN
+  PUBLISHED  // Aprovado e visível no blog
+  REJECTED   // Rejeitado pelo ADMIN (autor pode editar)
+}
