@@ -33,6 +33,8 @@ model Post {
   title       String
   content     String      @db.Text  // Permite textos longos
   slug        String      @unique   // URL amigável (ex: meu-primeiro-post)
+  excerpt     String?     @db.Text  // Resumo/descrição curta (opcional)
+  coverImage  String?     // URL da imagem de capa (opcional)
   status      PostStatus  @default(DRAFT)
   authorId    String      // ID do autor (FK)
   approvedBy  String?     // ID de quem aprovou (opcional, FK)

@@ -16,12 +16,21 @@ const generateSlug = (title) => {
 // Criar novo post (PUBLISHER ou ADMIN)
 const createPost = async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, excerpt, coverImage } = req.body;
     const authorId = req.user.id;
 
     // Validações
     if (!title || !content) {
       return res.status(400).json({ error: 'Título e conteúdo são obrigatórios' });
+    }
+
+    // Validar URL da imagem (se fornecida)
+    if (coverImage) {
+      try {
+        new URL(coverImage);
+      } catch (e) {
+        return res.status(400).json({ error: 'URL da imagem inválida' });
+      }
     }
 
     // Gerar slug único
@@ -37,6 +46,8 @@ const createPost = async (req, res) => {
       data: {
         title,
         content,
+        excerpt: excerpt || null,
+        coverImage: coverImage || null,
         slug,
         status: 'PENDING',
         authorId
@@ -184,7 +195,6 @@ const getPostBySlug = async (req, res) => {
     ) {
       return res.status(403).json({ error: 'Sem permissão para visualizar este post' });
     }
-
     res.json({ post });
   } catch (error) {
     console.error('Erro ao buscar post:', error);
