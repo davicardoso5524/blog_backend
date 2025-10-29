@@ -69,42 +69,32 @@ const createPost = async (req, res) => {
   }
 };
 
-// Listar posts com filtros
 const listPosts = async (req, res) => {
   try {
-    const { status, authorId, page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;
 
     let where = {};
 
     // ============================================
-    // REGRA 1: ADMIN vê TUDO
+    // 👑 ADMIN: vê todos os posts
     // ============================================
     if (req.user && req.user.role === 'ADMIN') {
-      // Admin vê todos os posts
-      if (status) where.status = status;
-      if (authorId) where.authorId = authorId;
-      
-      console.log('👑 Admin visualizando posts. Filtro:', where);
+      console.log('👑 Admin visualizando todos os posts');
     } 
     // ============================================
-    // REGRA 2: PUBLISHER vê apenas SEUS posts (todos os status)
+    // ✍️ PUBLISHER: vê apenas os próprios posts
     // ============================================
     else if (req.user && req.user.role === 'PUBLISHER') {
-      where.authorId = req.user.id; // Apenas posts do próprio usuário
-      
-      // Aplicar filtro de status se fornecido
-      if (status) where.status = status;
-      
-      console.log('✍️ Publisher visualizando próprios posts. Filtro:', where);
+      where.authorId = req.user.id;
+      console.log('✍️ Publisher visualizando seus posts (todos os status)');
     } 
     // ============================================
-    // REGRA 3: NÃO LOGADO vê apenas PUBLISHED
+    // 👤 VISITANTE: vê apenas posts publicados
     // ============================================
     else {
       where.status = 'PUBLISHED';
-      
-      console.log('👤 Visitante anônimo. Filtro:', where);
+      console.log('👤 Visitante visualizando apenas publicados');
     }
 
     const [posts, total] = await Promise.all([
@@ -125,8 +115,6 @@ const listPosts = async (req, res) => {
       prisma.post.count({ where })
     ]);
 
-    console.log(`📊 Retornando ${posts.length} posts de ${total} total`);
-
     res.json({
       posts,
       pagination: {
@@ -141,7 +129,6 @@ const listPosts = async (req, res) => {
     res.status(500).json({ error: 'Erro ao listar posts' });
   }
 };
-
 
 // Buscar post por ID
 const getPostById = async (req, res) => {
