@@ -15,7 +15,6 @@ app.use(express.urlencoded({ extended: true }));
 // Importar rotas
 const authRoutes = require('./routes/auth.routes');
 const postRoutes = require('./routes/post.routes');
-const publicRoutes = require('./routes/public.routes');
 
 // Rota de teste
 app.get('/', (req, res) => {
@@ -28,7 +27,6 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
-app.use('/api/public', publicRoutes);
 
 // Middleware de erro
 app.use((err, req, res, next) => {
