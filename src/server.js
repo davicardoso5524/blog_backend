@@ -28,6 +28,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/public', publicRoutes);
 
 // Middleware de erro
 app.use((err, req, res, next) => {
