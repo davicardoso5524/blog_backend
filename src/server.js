@@ -15,6 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 // Importar rotas
 const authRoutes = require('./routes/auth.routes');
 const postRoutes = require('./routes/post.routes');
+const publicRoutes = require('./routes/public.routes');
 
 // Rota de teste
 app.get('/', (req, res) => {
